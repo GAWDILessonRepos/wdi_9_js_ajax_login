@@ -56,19 +56,20 @@ var App = (function() {
   };
 
   var setupAjaxRequests = function() {
-    // $.ajaxPrefilter(function( options ) {
-    //   options.headers = {};
-    //   options.headers['Authorization: Token  token'] = authToken;
-    // });
+    $.ajaxPrefilter(function( options ) {
+      options.headers = {};
+      options.headers['AUTHORIZATION'] = "Token token=" + authToken;
+    });
   };
 
   // Let's assume that this requires login
   var loadPosts = function() {
+    debugger;
     $.ajax({
       url: apiHost + '/posts',
       type: 'GET',
       dataType: 'json',
-      headers: {'Authorization\:Token token\=': authToken}
+      // headers: {'AUTHORIZATION': "Token token=" + authToken}
     })
     .done(displayPosts)
     .fail(acceptFailure);
