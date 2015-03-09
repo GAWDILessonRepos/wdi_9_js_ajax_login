@@ -3,32 +3,72 @@
 var App = (function() {
   var authToken, apiHost;
 
-  var init = function() {
+  var run = function() {
     // When page loads, pull authToken out of localStorage
-    // If might be undefined, which is great
+    // It might be undefined, which is great
     authToken = localStorage.getItem('authToken');
 
     apiHost = 'http://localhost:3000/api/v1';
-
     setupAjaxRequests();
 
     $('#loadPosts').on('click', loadPosts);
+    $('#loginForm').on('submit', submitLogin);
+    $('#registrationForm').on('submit', submitRegistration);
+  };
+
+  var submitRegistration = function(event) {
+    event.preventDefault();
+
+    $.ajax({
+      url: apiHost + '/users',
+      type: 'POST',
+      data: {user: {email: $('#email').val(), password: $('#password').val()}},
+    })
+    .done(loginSuccess)
+    .fail(function(err) {
+      console.log(err);
+    });
+
+    return false;
+  };
+
+  var loginSuccess = function(userData) {
+    localStorage.setItem('authToken', userData.token);
+    console.log('logged in!');
+    window.location.href = '/';
+  };
+
+  var submitLogin = function(event) {
+    var $form;
+    event.preventDefault();
+    $form = $(this);
+    $.ajax({
+      url: apiHost + '/users/sign_in',
+      type: 'POST',
+      data: $form.serialize()
+    })
+    .done(loginSuccess)
+    .fail(function(err) {
+      console.log(err);
+    });
+
+    return false;
   };
 
   var setupAjaxRequests = function() {
-    $.ajaxPrefilter(function( options ) {
-      options.headers = {};
-      options.headers['Authorization'] = authToken;
-    });
+    // $.ajaxPrefilter(function( options ) {
+    //   options.headers = {};
+    //   options.headers['Authorization: Token  token'] = authToken;
+    // });
   };
-
 
   // Let's assume that this requires login
   var loadPosts = function() {
     $.ajax({
       url: apiHost + '/posts',
       type: 'GET',
-      dataType: 'json'
+      dataType: 'json',
+      headers: {'Authorization\:Token token\=': authToken}
     })
     .done(displayPosts)
     .fail(acceptFailure);
@@ -43,31 +83,14 @@ var App = (function() {
     // If status is unauthorized, then redirect to a login route/page
     if (error.status === 401) {
       console.log('SEND TO LOGIN SCREEN');
+      // window.location.href = '/sign_in.html';
     }
   };
 
-  return {init: init};
+  return {run: run};
 })();
 
 
-var AppRouter = Backbone.Router.extend({
-    routes: {
-        "*actions": "defaultRoute" // matches http://example.com/#anything-here
-    }
-});
-
 $(document).ready(function() {
-
-  App.init();
-
-  // var app_router = new AppRouter;
-  // app_router.on('route:defaultRoute', function(actions) {
-  //     alert(actions);
-  // });
-  // Backbone.history.start();
-
+  App.run();
 });
-
-// Set the Ajax headers for all requests to send token
-
-// Have a 'not logged in' failure function that redirects you to a login page
