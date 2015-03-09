@@ -64,12 +64,10 @@ var App = (function() {
 
   // Let's assume that this requires login
   var loadPosts = function() {
-    debugger;
     $.ajax({
       url: apiHost + '/posts',
       type: 'GET',
       dataType: 'json',
-      // headers: {'AUTHORIZATION': "Token token=" + authToken}
     })
     .done(displayPosts)
     .fail(acceptFailure);
@@ -84,7 +82,7 @@ var App = (function() {
     // If status is unauthorized, then redirect to a login route/page
     if (error.status === 401) {
       console.log('SEND TO LOGIN SCREEN');
-      // window.location.href = '/sign_in.html';
+      window.location.href = '/sign_in.html';
     }
   };
 
